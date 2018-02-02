@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "library(ggplot2)\nlibrary(gridExtra)\nlibrary(tidyverse)\n\n# Machine Learning Supervisionado e Não-Supervisionado\n\n# PCA -> redução de dimensões (\"prcomp\")\n\ndata(\"USArrests\")\nstr(USArrests)\n\n# Quais estados mais se parecem em criminalidade?\n\n# Tentar achar relação com duas colunas\nteste1 <- ggplot(data=USArrests, \n       aes(x=UrbanPop, y=Murder)) +\n  geom_text(label = rownames(USArrests))\nteste2 <- ggplot(data=USArrests, \n                 aes(x=UrbanPop, y=Rape)) +\n  geom_text(label = rownames(USArrests))\ngrid.arrange(teste1, teste2)\n\nggplot(data=USArrests, aes(x=Rape, y=Murder)) +\n  geom_point() + geom_smooth(method=\"lm\")\n\n# Aplicar PCA para reduzir colunas\ndados <- prcomp(t(USArrests), scale=T)\nggplot(data=NULL, aes(x=dados$rotation[,1],\n                      y=dados$roation[,2])) +\n  geom_text(aes(label = rownames(dados$roation)))\n\n\n##############################################\n\nindice <- readRDS('~/Downloads/Treinamento R/votacao_camara/indice_legislador.rds')\nvotacoes <- readRDS('~/Downloads/Treinamento R/votacao_camara/votacao.rds')\n\n# Distância Euclidiana (Teorem. Pitágoras)\nd_legislador <- dist(votacoes)\n\n#PCA\npca_deputados <- cmdscale(d_legislador)\npca_deputados <- data.frame(pca_deputados)\npca_deputados$id_legislator <- votacoes$id_legislator\nstr(pca_deputados)\n\nstr(indice)\nindice <- indice[!duplicated(indice),]\npca_deputados <- inner_join(pca_deputados, indice)\npca_deputados <- pca_deputados[!duplicated(pca_deputados),]\n\nggplot(pca_deputados, aes(x=X1,y=X2)) + \n  geom_text(aes(label = Partido), size = 2)\n\n\n##############################################\n\n# Clusters\n\n# No Cluster, é possível agrupar os dados sem necessidade de reduzir dimensões\n\nv <- .3\nx <- matrix(c(.3,.5,1.6,.5,1,.8), ncol=2)\nx1 <- c(rnorm(150,x[1,1],v), rnorm(150, x[2,1]), rnorm(150, x[3,1], v))\nx2 <- c(rnorm(150,x[1,2],v), rnorm(150, x[2,2]), rnorm(150, x[3,2], v))\ny <- c(rep(\"grupo1\", 150),rep(\"grupo2\", 150),rep(\"grupo3\", 150))\ndados <- data.frame(x1=x1,x2=x2,y=y)\n\ng1 <- ggplot(dados, aes(x=x1,y=x2, colour = factor(y))) + geom_point()\n\n# K-means\nresultado <- kmeans(dados[,1:2],3)\ndados$yhat <- resultado$cluster\n\ng2 <- ggplot(dados, aes(x=x1,y=x2, colour = factor(yhat))) + geom_point()\n\n# Hierarchical Cluster\ncluster <- hclust(dist(dados[,1:2]), method=\"centroid\") # O método pode variar, para fins de testes e verificação de qual se encaixa melhor no cenário\nplot(cluster)\ndados$hy <- cutree(cluster, 3)\n\ng3 <- ggplot(dados, aes(x=x1,y=x2, colour = factor(hy))) + geom_point()\n\ngrid.arrange(g1, g2, g3)\n\n\n##################################################\n\n# Redes Neurais\n\n# Pacote 'nnet'\n",
+    "created" : 1479989133869.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2701658347",
+    "id" : "C53F5F70",
+    "lastKnownWriteTime" : 1479999447,
+    "last_content_update" : 1479999447194,
+    "path" : "~/Curso_Estatistica/Aula_12.R",
+    "project_path" : "Aula_12.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
